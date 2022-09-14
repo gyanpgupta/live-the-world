@@ -9,7 +9,6 @@ export const modalSlice = createSlice({
   initialState,
   reducers: {
     setVisibility: (state, action) => {
-      console.log(action);
       state.visible = action.payload;
     },
   },

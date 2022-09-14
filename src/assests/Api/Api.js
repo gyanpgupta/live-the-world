@@ -24,4 +24,17 @@ export default class API {
     getActivity(param) {
         return fetchClient().get(`frontend/activities/slug/${param}`);
     }
+    getUserTrips() {
+        return fetchClient().get(`/frontend/trips`);
+    }
+    getNearbyActivities(param) {
+        return fetchClient().get(`/frontend/activities/nearby/${param}`);
+    }
+    addActivity(param) {
+        return fetchClient().put(`/frontend/trips/add_activity`, param)
+    }
+    removeActivity(param) {
+        return fetchClient().put(`/frontend/trips/remove_activity`, param)
+    }
+
 }

@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react'
-import sliderimg from '../../assests/image/slider1.jpg'
-import sliderimg2 from '../../assests/image/slider2.jpg'
-import sliderimg3 from '../../assests/image/slider3.jpg'
-import sliderimg4 from '../../assests/image/slider4.jpg'
 import mapimg from '../../assests/image/map.svg'
-// import Carousel from 'react-bootstrap/Carousel';
 import ActivityCard from './ActivityCard'
 import Carousel from 'react-multi-carousel'
 import { useSelector } from 'react-redux'
+import MyMapComponent, { MapWithAMarker } from './MapImplementation'
+import { useCallback } from 'react'
+import { useRef } from 'react'
 
 function ActivityPage() {
     const activityPageData = useSelector((state) => state.activity.activityData)
+    const nearByActivityPageData = useSelector((state) => state.activity.nearByActivityData)
+    const descriptionRef = useRef();
     const responsive = {
         desktop: {
             breakpoint: { max: 3000, min: 1024 },
@@ -29,30 +29,40 @@ function ActivityPage() {
         },
     };
 
-    const images = [
-        sliderimg, sliderimg2, sliderimg3, sliderimg4,
-    ];
+    const getDiscription = useCallback(() => {
+        const text = activityPageData.description_long;
+        const heading = /\*\*(.*?)\*\*/gm;
+        const result = text.replace(heading, `<p style="margin-top : 10px; margin-bottom : 0px"><b>$1</b></p>`);
+        descriptionRef.current.innerHTML = result;
+    }, [activityPageData]);
 
+    useEffect(() => {
+        if (activityPageData) {
+            getDiscription();
+        }
+    }, [activityPageData])
 
     return (
         <>
             {activityPageData &&
                 <>
-
-                    <div>
+                    <div className='mt-3 pt-3'>
                         <Carousel
                             itemClass="image-item"
                             responsive={responsive}
                             swipeable={true}
                             infinite
                         >
-                            {images.slice(0, 5).map((image) => {
+                            {activityPageData.images.map((image) => {
                                 return (
-                                    <img className="rounded-3"
-                                        src={image}
-                                        height={400}
-                                        loading="lazy"
-                                    />
+                                    <>
+                                        <img
+                                            className="rounded-3"
+                                            src={image.url}
+                                            height={400}
+                                        />
+                                        <p className='source-text'>{image.sourceText}</p>
+                                    </>
                                 );
                             })}
                         </Carousel>
@@ -64,10 +74,10 @@ function ActivityPage() {
                                     <h3 className='fw-bold text-uppercase mb-0'>{activityPageData.name}</h3>
                                     <div className='py-3'>
                                         <span className='border bg-white px-2 py-1 me-2'>
-                                            <a className='text-decoration-none' href='#'>Sightseeing</a>
+                                            <a className='text-decoration-none' href='#'>{activityPageData.labels[0].name}</a>
                                         </span>
                                         <span className='border bg-white px-2 py-1 me-2'>
-                                            <a className='text-decoration-none' href='#'>COVID Proof</a>
+                                            <a className='text-decoration-none' href='#'>{activityPageData.labels[1].name}</a>
                                         </span>
                                     </div>
                                 </div>
@@ -81,35 +91,57 @@ function ActivityPage() {
                                     <p className='text-green fw-bold'>
                                         {activityPageData.description_short}
                                     </p>
-                                    <p>{activityPageData.description_long}
+                                    <p ref={descriptionRef}>
                                     </p>
 
                                     <div className='mt-2 text-lgray text-xs'>
                                         Updated on 25 November 2021
                                     </div>
                                 </div>
-                                <div className='col-md-4 pe-0'>
-
-                                </div>
-                                <div className='col-md-12 px-0 py-3'>
-                                    <h5 className='text-green fw-bold'>Recommended Activities Nearby</h5>
-                                    <div className='row mx-0'>
-                                        <Carousel
-                                            itemClass="card-item"
-                                            responsive={responsive}
-                                            swipeable={true}
-                                            infinite
-                                        >
-                                            {images.slice(0, 5).map((image) => {
-                                                return (
-                                                    <ActivityCard image={image} />
-                                                )
-
-                                            })}
-
-                                        </Carousel>
+                                <div className='col-md-4 pe-0 ps-5'>
+                                    <div className='bg-light rounded-3 px-5 py-5 ms-5'>
+                                        <div>
+                                            <h6 className='text-orange'>Tips and Tricks</h6>
+                                            <ul>
+                                                <li>Gets windy and the stairs are a bit steep and narrow</li>
+                                            </ul>
+                                            <p className='text-green'>Getting There</p>
+                                            <ul>
+                                                <li>By Tram: close to tram stop Gent Korenmarkt perron 4. Trams 1 and 4 stop here</li>
+                                                <li>By Bus: close to bus stop Gent Korenmarkt perron 4. Bus N4 stops here</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
+                                <div className='bg-dark'>
+                                    <MyMapComponent
+                                        googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+                                        loadingElement={<div style={{ height: `100%` }} />}
+                                        containerElement={<div style={{ height: `400px` }} />}
+                                        mapElement={<div style={{ height: `100%` }} />}
+                                        lat={activityPageData.latitude}
+                                        lng={activityPageData.longitude}
+                                        isMarkerShown={true}
+                                    />
+                                </div>
+                                {nearByActivityPageData &&
+                                    <div className='col-md-12 px-0 py-3'>
+                                        <h5 className='text-green fw-bold'>Recommended Activities Nearby</h5>
+                                        <div className='row mx-0'>
+                                            <Carousel
+                                                itemClass="card-item"
+                                                responsive={responsive}
+                                                swipeable={true}
+                                                infinite
+                                            >
+                                                {nearByActivityPageData.map((data) => {
+                                                    return (
+                                                        <ActivityCard data={data} />
+                                                    )
+                                                })}
+                                            </Carousel>
+                                        </div>
+                                    </div>}
                             </div>
                         </div>
                     </div>
