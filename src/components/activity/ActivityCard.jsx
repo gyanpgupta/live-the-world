@@ -15,8 +15,11 @@ export default function ActivityCard(props) {
     }
 
     const handleCheck = useCallback(() => {
-        let favouriteObj = tripsPageData && tripsPageData?.find(trip => trip.type === 'favorite');
-        return favouriteObj.activities.find(activity => activity.id === props.data.id);
+        if (tripsPageData) {
+            let favouriteObj = tripsPageData?.find(trip => trip.type === 'favorite');
+            return favouriteObj.activities.find(activity => activity.id === props.data.id);
+        }
+        return false;
     }, [tripsPageData, props.data]);
 
     const handleFavorite = () => {

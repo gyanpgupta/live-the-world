@@ -15,10 +15,10 @@ function App() {
   useEffect(() => {
     if (!localStorage.getItem('token')) {
       dispatch(setVisibility(true));
+    } else {
+      dispatch(getTrips());
     }
     dispatch(getActivity(params.activity));
-    dispatch(getTrips())
-
   })
   return (
     <div className="App">

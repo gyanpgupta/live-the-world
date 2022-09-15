@@ -17,8 +17,11 @@ function ActivityPage() {
     const descriptionRef = useRef();
 
     const handleCheck = useCallback(() => {
-        let favouriteObj = tripsPageData && tripsPageData?.find(trip => trip.type === 'favorite');
-        return favouriteObj?.activities.find(activity => activity.id === activityPageData.id);
+        if (tripsPageData) {
+            let favouriteObj = tripsPageData?.find(trip => trip.type === 'favorite');
+            return favouriteObj?.activities.find(activity => activity.id === activityPageData.id);
+        }
+        return false;
     }, [activityPageData, tripsPageData]);
 
     const handleFavorite = () => {
