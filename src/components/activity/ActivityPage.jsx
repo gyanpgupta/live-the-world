@@ -2,15 +2,39 @@ import React, { useEffect } from 'react'
 import mapimg from '../../assests/image/map.svg'
 import ActivityCard from './ActivityCard'
 import Carousel from 'react-multi-carousel'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import MyMapComponent, { MapWithAMarker } from './MapImplementation'
 import { useCallback } from 'react'
 import { useRef } from 'react'
+import { addActivity, removeActivity } from '../../redux/slices/TripSlice'
 
 function ActivityPage() {
-    const activityPageData = useSelector((state) => state.activity.activityData)
-    const nearByActivityPageData = useSelector((state) => state.activity.nearByActivityData)
+    const activityPageData = useSelector((state) => state.activity.activityData);
+    const nearByActivityPageData = useSelector((state) => state.activity.nearByActivityData);
+    const tripsPageData = useSelector((state) => state.trips.tripsData);
+
+    const dispatch = useDispatch()
     const descriptionRef = useRef();
+
+    const handleCheck = useCallback(() => {
+        let favouriteObj = tripsPageData && tripsPageData?.find(trip => trip.type === 'favorite');
+        return favouriteObj?.activities.find(activity => activity.id === activityPageData.id);
+    }, [activityPageData, tripsPageData]);
+
+    const handleFavorite = () => {
+        let favouriteObj = tripsPageData && tripsPageData?.find(trip => trip.type === 'favorite');
+        const item = {
+            activityId: activityPageData.id,
+            tripId: favouriteObj.id,
+            tripType: "favorite"
+        };
+        handleCheck() ?
+            dispatch(removeActivity(item))
+            :
+            dispatch(addActivity(item))
+
+    }
+
     const responsive = {
         desktop: {
             breakpoint: { max: 3000, min: 1024 },
@@ -47,6 +71,9 @@ function ActivityPage() {
             {activityPageData &&
                 <>
                     <div className='mt-3 pt-3'>
+                        <div>
+                            <button className='position-absolute save-btn banner-save-btn text-white rounded-3 px-3' onClick={handleFavorite}>{`${handleCheck() ? 'Saved' : 'Save'}`}</button>
+                        </div>
                         <Carousel
                             itemClass="image-item"
                             responsive={responsive}
@@ -98,21 +125,6 @@ function ActivityPage() {
                                         Updated on 25 November 2021
                                     </div>
                                 </div>
-                                <div className='col-md-4 pe-0 ps-5'>
-                                    <div className='bg-light rounded-3 px-5 py-5 ms-5'>
-                                        <div>
-                                            <h6 className='text-orange'>Tips and Tricks</h6>
-                                            <ul>
-                                                <li>Gets windy and the stairs are a bit steep and narrow</li>
-                                            </ul>
-                                            <p className='text-green'>Getting There</p>
-                                            <ul>
-                                                <li>By Tram: close to tram stop Gent Korenmarkt perron 4. Trams 1 and 4 stop here</li>
-                                                <li>By Bus: close to bus stop Gent Korenmarkt perron 4. Bus N4 stops here</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div className='bg-dark'>
                                     <MyMapComponent
                                         googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
@@ -122,6 +134,8 @@ function ActivityPage() {
                                         lat={activityPageData.latitude}
                                         lng={activityPageData.longitude}
                                         isMarkerShown={true}
+
+
                                     />
                                 </div>
                                 {nearByActivityPageData &&

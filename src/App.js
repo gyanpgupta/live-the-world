@@ -7,6 +7,7 @@ import LoginModal from './components/LoginModal';
 import { useDispatch } from 'react-redux';
 import { getActivity } from './redux/slices/ActivitySlice';
 import { useParams } from 'react-router-dom';
+import { getTrips } from './redux/slices/TripSlice';
 
 function App() {
   const params = useParams();
@@ -14,12 +15,14 @@ function App() {
   useEffect(() => {
     if (!localStorage.getItem('token')) {
       dispatch(setVisibility(true));
-      dispatch(getActivity(params.activity))
     }
+    dispatch(getActivity(params.activity));
+    dispatch(getTrips())
+
   })
   return (
     <div className="App">
-      {/* <LoginModal /> */}
+      <LoginModal />
       <ActivityPage />
 
     </div>

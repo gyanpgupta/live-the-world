@@ -7,28 +7,24 @@ export const getTrips = createAsyncThunk(
     'trips',
     async () => {
         let response = {};
-        await api.getTrips().then(res => response = res.data).catch(error => console.log(error))
+        await api.getUserTrips().then(res => response = res.data).catch(error => console.log(error))
         return response;
     }
 )
 
 export const addActivity = createAsyncThunk(
-    'trips',
+    'trips/addTrip',
     async (slug, { dispatch }) => {
-        let response = {};
-        await api.addActivity(slug).then(res => response = res.data).catch(error => console.log(error))
-        dispatch(getTrips())
-        return response;
+        await api.addActivity(slug).then(res => dispatch(getTrips())).catch(error => console.log(error));
+        return true;
     }
 )
 
 export const removeActivity = createAsyncThunk(
-    'trips',
+    'trips/removeTrip',
     async (slug, { dispatch }) => {
-        let response = {};
-        await api.removeActivity(slug).then(res => response = res.data).catch(error => console.log(error))
-        dispatch(getTrips())
-        return response;
+        await api.removeActivity(slug).then(res => dispatch(getTrips())).catch(error => console.log(error));
+        return true;
     }
 )
 
@@ -42,6 +38,12 @@ const tripsSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(getTrips.fulfilled, (state, action) => {
             state.tripsData = action.payload;
+        });
+        builder.addCase(addActivity.fulfilled, (state, action) => {
+            console.log('Added')
+        })
+        builder.addCase(removeActivity.fulfilled, (state, action) => {
+            console.log('Removed');
         })
     },
 });
